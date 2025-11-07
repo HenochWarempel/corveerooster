@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Corveerooster Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f7f7f7; }
+    h2 { margin-top: 40px; }
+    table { border-collapse: collapse; width: 100%; background: #fff; margin-bottom: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #eee; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; border: none; background: #0077cc; color: white; border-radius: 6px; }
+    button:hover { background: #005fa3; }
+    .rooster { background: #fff; padding: 20px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <h1>Corveerooster Generator</h1>
+  <p>Selecteer wie aanwezig is en op welke dagen. Klik daarna op "Maak het rooster".</p>
+
+  <div id="form-container"></div>
+
+  <button id="generate">Maak het rooster</button>
+
+  <div class="rooster" id="output"></div>
+
+  <script>
+    const days = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag"];
+    const boven = ["Bart", "Bob", "Koen", "Marcel", "Remco", "Sander", "Simon", "Tom"];
+    const beneden = ["Danny", "Esmee", "Henoch", "Marc", "Marije", "Mark", "Maud", "Nora", "Pascal", "Peter", "Rick", "Tim"];
+
+    const restrictions = {
+      "Bart": [],
+      "Simon": ["Woensdag", "Vrijdag"],
+      "Maud": ["Woensdag", "Vrijdag"],
+      "Esmee": ["Woensdag", "Vrijdag"],
+      "Marije": ["Woensdag", "Vrijdag"],
+      "Henoch": ["Woensdag", "Vrijdag"],
+      "Koen": ["Woensdag"]
+    };
+
+    const formContainer = document.getElementById("form-container");
+
+    function createTable(title, names) {
+      let html = `<h2>${title}</h2><table><tr><th>Naam</th><th>Aanwezig</th>`;
+      for (const d of days) html += `<th>${d}</th>`;
+      html += "</tr>";
+
+      for (const name of names) {
+        html += `<tr><td>${name}</td>`;
+        const disabled = restrictions[name] && restrictions[name].length === 0 && name === "Bart" ? "checked" : "checked";
+        html += `<td><input type="checkbox" id="active-${name}" ${name === "Bart" ? "" : "checked"}></td>`;
+        for (const d of days) {
+          const checked = restrictions[name]?.includes(d) ? "" : "checked";
+          html += `<td><input type="checkbox" id="day-${name}-${d}" ${checked}></td>`;
+        }
+        html += "</tr>";
+      }
+      html += "</table>";
+      return html;
+    }
+
+    formContainer.innerHTML = createTable("Boven", boven) + createTable("Beneden", beneden);
+
+    document.getElementById("generate").addEventListener("click", () => {
+      const available = { boven: {}, beneden: {} };
+
+      for (const group of ["boven", "beneden"]) {
+        const list = group === "boven" ? boven : beneden;
+        for (const name of list) {
+          const active = document.getElementById(`active-${name}`).checked;
+          if (!active) continue;
+          available[group][name] = days.filter(d => document.getElementById(`day-${name}-${d}`).checked);
+        }
+      }
+
+      const rooster = {};
+      for (const d of days) {
+        const bovenNames = Object.entries(available.boven).filter(([_, v]) => v.includes(d)).map(([k]) => k);
+        const benedenNames = Object.entries(available.beneden).filter(([_, v]) => v.includes(d)).map(([k]) => k);
+
+        let pair;
+        if (bovenNames.length && benedenNames.length) {
+          const b = bovenNames[Math.floor(Math.random() * bovenNames.length)];
+          const bn = benedenNames[Math.floor(Math.random() * benedenNames.length)];
+          pair = [b, bn];
+        } else {
+          const all = [...bovenNames, ...benedenNames];
+          pair = all.sort(() => 0.5 - Math.random()).slice(0, 2);
+        }
+        rooster[d] = pair;
+      }
+
+      let output = "<h2>Corveerooster</h2><table><tr><th>Dag</th><th>Corvee-team</th></tr>";
+      for (const d of days) {
+        const team = rooster[d]?.length ? rooster[d].join(" & ") : "Geen combinatie beschikbaar";
+        output += `<tr><td>${d}</td><td>${team}</td></tr>`;
+      }
+      output += "</table>";
+
+      document.getElementById("output").innerHTML = output;
+    });
+  </script>
+
+</body>
+</html>

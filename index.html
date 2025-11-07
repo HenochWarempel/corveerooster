@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Corveerooster Generator</title>
+  <title>Corveerooster-generator</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 40px; background: #f7f7f7; }
-    h2 { margin-top: 40px; }
+    h1, h2 { color: #333; }
     table { border-collapse: collapse; width: 100%; background: #fff; margin-bottom: 20px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
     th { background: #eee; }
@@ -17,7 +17,7 @@
 </head>
 <body>
 
-  <h1>Corveerooster Generator</h1>
+  <h1>Corveerooster-generator</h1>
   <p>Selecteer wie aanwezig is en op welke dagen. Klik daarna op "Maak het rooster".</p>
 
   <div id="form-container"></div>
@@ -50,11 +50,13 @@
 
       for (const name of names) {
         html += `<tr><td>${name}</td>`;
-        const disabled = restrictions[name] && restrictions[name].length === 0 && name === "Bart" ? "checked" : "checked";
-        html += `<td><input type="checkbox" id="active-${name}" ${name === "Bart" ? "" : "checked"}></td>`;
+        const isBart = name === "Bart";
+        html += `<td><input type="checkbox" id="active-${name}" ${isBart ? "" : "checked"}></td>`;
+
         for (const d of days) {
           const checked = restrictions[name]?.includes(d) ? "" : "checked";
-          html += `<td><input type="checkbox" id="day-${name}-${d}" ${checked}></td>`;
+          const disabled = isBart ? "disabled" : "";
+          html += `<td><input type="checkbox" id="day-${name}-${d}" ${checked} ${disabled}></td>`;
         }
         html += "</tr>";
       }
@@ -63,6 +65,20 @@
     }
 
     formContainer.innerHTML = createTable("Boven", boven) + createTable("Beneden", beneden);
+
+    // Disable/enable day checkboxes when someone is toggled aanwezig/afwezig
+    function updateAvailability(name) {
+      const active = document.getElementById(`active-${name}`).checked;
+      for (const d of days) {
+        const checkbox = document.getElementById(`day-${name}-${d}`);
+        checkbox.disabled = !active;
+        checkbox.checked = active && !(restrictions[name]?.includes(d));
+      }
+    }
+
+    [...boven, ...beneden].forEach(name => {
+      document.getElementById(`active-${name}`).addEventListener("change", () => updateAvailability(name));
+    });
 
     document.getElementById("generate").addEventListener("click", () => {
       const available = { boven: {}, beneden: {} };
@@ -76,20 +92,32 @@
         }
       }
 
+      // Clone availability so we can remove names after use
+      const used = new Set();
       const rooster = {};
-      for (const d of days) {
-        const bovenNames = Object.entries(available.boven).filter(([_, v]) => v.includes(d)).map(([k]) => k);
-        const benedenNames = Object.entries(available.beneden).filter(([_, v]) => v.includes(d)).map(([k]) => k);
 
-        let pair;
+      for (const d of days) {
+        const bovenNames = Object.entries(available.boven)
+          .filter(([k, v]) => v.includes(d) && !used.has(k))
+          .map(([k]) => k);
+        const benedenNames = Object.entries(available.beneden)
+          .filter(([k, v]) => v.includes(d) && !used.has(k))
+          .map(([k]) => k);
+
+        let pair = [];
+
         if (bovenNames.length && benedenNames.length) {
           const b = bovenNames[Math.floor(Math.random() * bovenNames.length)];
           const bn = benedenNames[Math.floor(Math.random() * benedenNames.length)];
           pair = [b, bn];
+          used.add(b);
+          used.add(bn);
         } else {
-          const all = [...bovenNames, ...benedenNames];
+          const all = [...bovenNames, ...benedenNames].filter(n => !used.has(n));
           pair = all.sort(() => 0.5 - Math.random()).slice(0, 2);
+          pair.forEach(p => used.add(p));
         }
+
         rooster[d] = pair;
       }
 
@@ -99,7 +127,6 @@
         output += `<tr><td>${d}</td><td>${team}</td></tr>`;
       }
       output += "</table>";
-
       document.getElementById("output").innerHTML = output;
     });
   </script>

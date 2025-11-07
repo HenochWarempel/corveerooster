@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Corveerooster-generator</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f7f7f7; }
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f7f7f7; display: flex; flex-direction: column; min-height: 100vh; }
     h1, h2 { color: #333; }
     table { border-collapse: collapse; width: 100%; background: #fff; margin-bottom: 20px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
@@ -13,18 +13,25 @@
     button { padding: 10px 20px; font-size: 16px; cursor: pointer; border: none; background: #0077cc; color: white; border-radius: 6px; }
     button:hover { background: #005fa3; }
     .rooster { background: #fff; padding: 20px; border-radius: 8px; }
+    footer { font-size: 12px; color: #555; margin-top: auto; text-align: center; padding-top: 20px; }
+    footer a { color: #0077cc; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
   <h1>Corveerooster-generator</h1>
-  <p>Selecteer wie aanwezig is en op welke dagen. Klik daarna op "Maak het rooster".</p>
+  <p>Selecteer wie meegenomen moet worden in de roosterbepaling en op welke dagen die persoon aanwezig is. Klik daarna op "Maak het rooster".</p>
 
   <div id="form-container"></div>
 
   <button id="generate">Maak het rooster</button>
 
   <div class="rooster" id="output"></div>
+
+  <footer>
+    © All rights reserved but not allemaal. <a href="https://wijzijnweb.slack.com/team/U02L7S32C8Y" target="_blank">Slack Henoch</a>
+  </footer>
 
   <script>
     const days = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag"];
@@ -44,7 +51,7 @@
     const formContainer = document.getElementById("form-container");
 
     function createTable(title, names) {
-      let html = `<h2>${title}</h2><table><tr><th>Naam</th><th>Aanwezig</th>`;
+      let html = `<h2>${title}</h2><table><tr><th>Naam</th><th>Meetellen</th>`;
       for (const d of days) html += `<th>${d}</th>`;
       html += "</tr>";
 
@@ -66,7 +73,7 @@
 
     formContainer.innerHTML = createTable("Boven", boven) + createTable("Beneden", beneden);
 
-    // Disable/enable day checkboxes when someone is toggled aanwezig/afwezig
+    // Disable/enable day checkboxes when toggling "Meetellen"
     function updateAvailability(name) {
       const active = document.getElementById(`active-${name}`).checked;
       for (const d of days) {
@@ -92,7 +99,7 @@
         }
       }
 
-      // Clone availability so we can remove names after use
+      // Avoid duplicates: track who has been used
       const used = new Set();
       const rooster = {};
 

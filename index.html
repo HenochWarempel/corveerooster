@@ -5,23 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Corveerooster-generator</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f7f7f7; display: flex; flex-direction: column; min-height: 100vh; }
-    h1, h2 { color: #333; }
-    table { border-collapse: collapse; width: 100%; background: #fff; margin-bottom: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-    th { background: #eee; }
-    button { padding: 10px 20px; font-size: 16px; cursor: pointer; border: none; background: #0077cc; color: white; border-radius: 6px; }
-    button:hover { background: #005fa3; }
-    .rooster { background: #fff; padding: 20px; border-radius: 8px; }
-    footer { font-size: 12px; color: #555; margin-top: auto; text-align: center; padding-top: 20px; }
-    footer a { color: #0077cc; text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    h1, h2 {
+      color: #333;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #fff;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background: #eee;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background: #0077cc;
+      color: white;
+      border-radius: 6px;
+    }
+
+    button:hover {
+      background: #005fa3;
+    }
+
+    .rooster {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    footer {
+      font-size: 12px;
+      color: #555;
+      margin-top: auto;
+      text-align: center;
+      padding-top: 20px;
+    }
+
+    footer a {
+      color: #0077cc;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
   <h1>Corveerooster-generator</h1>
-  <p>Selecteer wie meegenomen moet worden in de roosterbepaling en op welke dagen die persoon aanwezig is. Klik daarna op "Maak het rooster".</p>
+  <p>
+    Selecteer wie meegenomen moet worden in de roosterbepaling en op welke dagen die persoon aanwezig is.
+    Klik daarna op "Maak het rooster".
+  </p>
 
   <div id="form-container"></div>
 
@@ -30,62 +88,74 @@
   <div class="rooster" id="output"></div>
 
   <footer>
-    © All rights reserved but not allemaal. <a href="https://wijzijnweb.slack.com/team/U02L7S32C8Y" target="_blank">Slack Henoch</a>
+    © All rights reserved but not allemaal.
+    <a href="https://wijzijnweb.slack.com/team/U02L7S32C8Y" target="_blank">Slack Henoch</a>
   </footer>
 
   <script>
     const days = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag"];
+
     const boven = ["Bart", "Bob", "Koen", "Marcel", "Remco", "Sander", "Simon", "Suze", "Tom"];
     const beneden = ["Danny", "Esmee", "Henoch", "Marc", "Marije", "Mark", "Maud", "Leon", "Nora", "Pascal", "Peter", "Rick", "Tim"];
 
     const restrictions = {
-      "Simon": ["Woensdag", "Vrijdag"],
-      "Maud": ["Woensdag", "Vrijdag"],
-      "Esmee": ["Woensdag", "Vrijdag"],
-      "Marije": ["Woensdag", "Vrijdag"],
-      "Marc": ["Woensdag"],
-      "Bart": ["Woensdag"],
-      "Bob": ["Woensdag"],
-      "Pascal": ["Woensdag"],
-      "Sander": ["Woensdag"],
-      "Peter": ["Maandag"],
-      "Nora": ["Dinsdag", "Woensdag"],
-      "Rick": ["Maandag", "Woensdag", "Donderdag"],
-      "Henoch": ["Woensdag", "Vrijdag"],
-      "Remco": ["Woensdag"],
-      "Koen": ["Woensdag"]
+      Simon: ["Woensdag", "Vrijdag"],
+      Maud: ["Woensdag", "Vrijdag"],
+      Esmee: ["Woensdag", "Vrijdag"],
+      Marije: ["Woensdag", "Vrijdag"],
+      Marc: ["Woensdag"],
+      Bart: ["Woensdag"],
+      Bob: ["Woensdag"],
+      Pascal: ["Woensdag"],
+      Sander: ["Woensdag"],
+      Peter: ["Maandag"],
+      Nora: ["Dinsdag", "Woensdag"],
+      Rick: ["Maandag", "Woensdag", "Donderdag"],
+      Henoch: ["Woensdag", "Vrijdag"],
+      Remco: ["Woensdag"],
+      Koen: ["Woensdag"]
     };
 
     const formContainer = document.getElementById("form-container");
 
     function createTable(title, names) {
       let html = `<h2>${title}</h2><table><tr><th>Naam</th><th>Meetellen</th>`;
-      for (const d of days) html += `<th>${d}</th>`;
+
+      for (const d of days) {
+        html += `<th>${d}</th>`;
+      }
+
       html += "</tr>";
-/*
-        for (const name of names) {
+
+      for (const name of names) {
         html += `<tr><td>${name}</td>`;
-        const isBart = name === "Bart";
-        html += `<td><input type="checkbox" id="active-${name}" ${isBart ? "" : "checked"}></td>`;
+
+        html += `<td>
+          <input type="checkbox" id="active-${name}" checked>
+        </td>`;
 
         for (const d of days) {
           const checked = restrictions[name]?.includes(d) ? "" : "checked";
-          const disabled = isBart ? "disabled" : "";
-          html += `<td><input type="checkbox" id="day-${name}-${d}" ${checked} ${disabled}></td>`;
+
+          html += `<td>
+            <input type="checkbox" id="day-${name}-${d}" ${checked}>
+          </td>`;
         }
-        */
+
         html += "</tr>";
       }
-      
+
       html += "</table>";
       return html;
     }
 
-    formContainer.innerHTML = createTable("Boven", boven) + createTable("Beneden", beneden);
+    formContainer.innerHTML =
+      createTable("Boven", boven) +
+      createTable("Beneden", beneden);
 
-    // Disable/enable day checkboxes when toggling "Meetellen"
     function updateAvailability(name) {
       const active = document.getElementById(`active-${name}`).checked;
+
       for (const d of days) {
         const checkbox = document.getElementById(`day-${name}-${d}`);
         checkbox.disabled = !active;
@@ -94,7 +164,9 @@
     }
 
     [...boven, ...beneden].forEach(name => {
-      document.getElementById(`active-${name}`).addEventListener("change", () => updateAvailability(name));
+      document
+        .getElementById(`active-${name}`)
+        .addEventListener("change", () => updateAvailability(name));
     });
 
     document.getElementById("generate").addEventListener("click", () => {
@@ -102,14 +174,17 @@
 
       for (const group of ["boven", "beneden"]) {
         const list = group === "boven" ? boven : beneden;
+
         for (const name of list) {
           const active = document.getElementById(`active-${name}`).checked;
           if (!active) continue;
-          available[group][name] = days.filter(d => document.getElementById(`day-${name}-${d}`).checked);
+
+          available[group][name] = days.filter(d =>
+            document.getElementById(`day-${name}-${d}`).checked
+          );
         }
       }
 
-      // Avoid duplicates: track who has been used
       const used = new Set();
       const rooster = {};
 
@@ -117,6 +192,7 @@
         const bovenNames = Object.entries(available.boven)
           .filter(([k, v]) => v.includes(d) && !used.has(k))
           .map(([k]) => k);
+
         const benedenNames = Object.entries(available.beneden)
           .filter(([k, v]) => v.includes(d) && !used.has(k))
           .map(([k]) => k);
@@ -126,28 +202,45 @@
         if (bovenNames.length && benedenNames.length) {
           const b = bovenNames[Math.floor(Math.random() * bovenNames.length)];
           const bn = benedenNames[Math.floor(Math.random() * benedenNames.length)];
+
           pair = [b, bn];
           used.add(b);
           used.add(bn);
         } else {
           const all = [...bovenNames, ...benedenNames].filter(n => !used.has(n));
-          pair = all.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+          pair = all
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 2);
+
           pair.forEach(p => used.add(p));
         }
 
         rooster[d] = pair;
       }
 
-      let output = "<h2>Corveerooster</h2><table><tr><th>Dag</th><th>Corvee-team</th></tr>";
+      let output = `
+        <h2>Corveerooster</h2>
+        <table>
+          <tr>
+            <th>Dag</th>
+            <th>Corvee-team</th>
+          </tr>
+      `;
+
       for (const d of days) {
-        const team = rooster[d]?.length ? rooster[d].join(" & ") : "Geen combinatie beschikbaar";
+        const team = rooster[d]?.length
+          ? rooster[d].join(" & ")
+          : "Geen combinatie beschikbaar";
+
         output += `<tr><td>${d}</td><td>${team}</td></tr>`;
       }
+
       output += "</table>";
+
       document.getElementById("output").innerHTML = output;
     });
   </script>
 
 </body>
 </html>
-

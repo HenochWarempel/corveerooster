@@ -62,8 +62,7 @@
       let html = `<h2>${title}</h2><table><tr><th>Naam</th><th>Meetellen</th>`;
       for (const d of days) html += `<th>${d}</th>`;
       html += "</tr>";
-
-      <!--
+/*
         for (const name of names) {
         html += `<tr><td>${name}</td>`;
         const isBart = name === "Bart";
@@ -74,9 +73,10 @@
           const disabled = isBart ? "disabled" : "";
           html += `<td><input type="checkbox" id="day-${name}-${d}" ${checked} ${disabled}></td>`;
         }
+        */
         html += "</tr>";
       }
-      -->
+      
       html += "</table>";
       return html;
     }
